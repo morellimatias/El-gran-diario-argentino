@@ -15,9 +15,14 @@ class Mes {
 	}
 	
 	method buscarProduccion(persona) {
-		
+		var listasNotas
+		listasNotas = diarios.map({ejemplar => ejemplar.notasPublicadas()})
+		return listasNotas.any({lista => (lista.map({nota => nota.nombre()})).contains (persona)})	
 	}
 	
+	method cantVecesPublicada(publicidad) {
+		return diarios.foldl(0, {cant, ejemplar => cant + ((ejemplar.publicidadesPublicadas()).filter({x => x == publicidad})).size()   })
+	}
 	
 	
 }
@@ -58,8 +63,16 @@ class Diario {
 		notas.add(nota)
 	}
 	
+	method notasPublicadas() {
+		return notas
+	}
+	
 	method agregarPublicidad(publicidad, veces) {
 		veces.times({publicidades.add(publicidad)})
+	}
+	
+	method publicidadesPublicadas() {
+		return publicidades
 	}
 	
 	method nombreDia() {
@@ -87,15 +100,19 @@ class Diario {
 	}
 	
 	method publicidadesOcupan() {
-		return publicidades.sum({publicidad => publicidad.costo()})
+		return publicidades.sum({publicidad => publicidad.ocupa()})
 	}
 	
 	method notasOcupan() {
-		return notas.sum({nota => nota.costo()})
+		return notas.sum({nota => nota.ocupa()})
 	}
 	
 	method promedioCmOcupadosPorPagina(){
 		return (self.publicidadesOcupan() + self.notasOcupan()) / paginas
+	}
+	
+	method cantidadVecesPublicada(publicidad) {
+		return publicidades.filter({x => x.nombrePublic() == publicidad})
 	}
 }
 
@@ -212,12 +229,14 @@ class NotaExtranjera inherits NotaLocal {
 
 class Publicidad {
 	var nombreCreativo
+	var nombrePublicidad
 	var cliente
 	var valorXCm
 	var largo
 	
-	constructor(_nombre, _cliente, _valor, _largo) {
-		nombreCreativo = _nombre
+	constructor(_nombreCreativo, _nombrePublicidad, _cliente, _valor, _largo) {
+		nombreCreativo = _nombreCreativo
+		nombrePublicidad = _nombrePublicidad
 		cliente = _cliente
 		valorXCm = _valor
 		largo = _largo
@@ -233,6 +252,10 @@ class Publicidad {
 	
 	method nombre() {
 		return nombreCreativo
+	}
+	
+	method nombrePubic() {
+		return nombrePublicidad
 	}
 }
 
