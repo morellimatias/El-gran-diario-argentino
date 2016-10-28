@@ -21,7 +21,11 @@ class Mes {
 	}
 	
 	method cantVecesPublicada(publicidad) {
-		return diarios.foldl(0, {cant, ejemplar => cant + ((ejemplar.publicidadesPublicadas()).filter({x => x == publicidad})).size()   })
+		return diarios.sum({ejemplar => ejemplar.cantidadVecesPublicada(publicidad)})
+	}
+	
+	method saldoFinal() {
+		return diarios.sum({ejemplar => ejemplar.saldoDiario()}) - costosFijos
 	}
 	
 	
@@ -35,6 +39,7 @@ class Diario {
 	var noVendidos
 	var notas = []
 	var publicidades = []
+	var fotos = []
 	
 	constructor(_dia,_paginas, _tirada, _precio) {
 		dia = _dia
@@ -75,6 +80,10 @@ class Diario {
 		return publicidades
 	}
 	
+	method agregarFoto(foto) {
+		fotos.add(foto)
+	}
+	
 	method nombreDia() {
 		return dia
 	}
@@ -87,12 +96,16 @@ class Diario {
 		return notas.sum({nota => nota.costo()})
 	}
 	
+	method egresosPorFotos() {
+		return fotos.sum({foto => foto.costo()})
+	}
+	
 	method ingresos() {
 		return self.ingresosPorVentas() + self.ingresosPorPublicidad() 
 	}
 	
 	method egresos() {
-		return self.egresosPorTirada() + self.egresosPorNotas()
+		return self.egresosPorTirada() + self.egresosPorNotas() + self.egresosPorFotos()
 	}
 	
 	method saldoDiario() {
@@ -112,113 +125,91 @@ class Diario {
 	}
 	
 	method cantidadVecesPublicada(publicidad) {
-		return publicidades.filter({x => x.nombrePublic() == publicidad})
+		return (publicidades.filter({x => x  == publicidad})).size()
 	}
 }
 
 
-class Nota {
-	var cantCaracteres
+class ElementosDiario {
+	var nombreAutor
+	var tamanio // Medida segun cada elemento
 	
-	constructor(_cant) {
-		cantCaracteres = _cant
+	constructor(_nombre, _tamanio) {
+		nombreAutor = _nombre
+		tamanio = _tamanio
+	}
+	
+	method nombre() {
+		return nombreAutor
 	}
 	
 	method ocupa() {
-		return cantCaracteres / 20
+		return tamanio
 	}
 }
 
 
-class NotaPeriodista inherits Nota {
-	var nombrePeriodista
+class Nota inherits ElementosDiario {
+	constructor(_nombreAutor, _cantCaracteres) = super(_nombreAutor, _cantCaracteres)
 	
-	constructor(_cant, _nombre) = super(_cant) {
-		nombrePeriodista = _nombre
+	override method ocupa() {
+		return tamanio / 20
 	}
+}
+
+
+class NotaPeriodista inherits Nota {	
+	constructor(_cantCaracteres, _nombrePeriodista) = super(_nombrePeriodista, _cantCaracteres)
 	
 	method costo() {
-		return (cantCaracteres * 50) / 1000
-	}
-	
-	method nombre() { 
-		return nombrePeriodista
+		return (tamanio * 50) / 1000
 	}	
 }
 
 
 class NotaEscritor inherits Nota {
-	var nombreEscritor
-	
-	constructor(_cant, _nombre) = super(_cant) {
-		nombreEscritor = _nombre
-	}
+	constructor(_cantCaracteres, _nombreEscritor) = super(_nombreEscritor, _cantCaracteres)
 	
 	method costo() {
-		return (cantCaracteres * 100) / 1000
+		//return (cantCaracteres * 100) / 1000
+		return (tamanio * 100) / 1000
 	}
-	
-	method nombre() { 
-		return nombreEscritor
-	}	
 }
 
 
-class NotaCelebridad inherits Nota {
-	var nombreCelebridad
-	
-	constructor(_cant, _nombre) = super(_cant) {
-		nombreCelebridad = _nombre
-	}
+class NotaCelebridad inherits Nota {	
+	constructor(_cantCaracteres, _nombreCelebridad) = super(_nombreCelebridad, _cantCaracteres)
 	
 	method costo() {
-		return (cantCaracteres * 500) / 1000
+		return (tamanio * 500) / 1000
 	}
-	
-	method nombre() { 
-		return nombreCelebridad
-	}	
 }
 
 
-class NotaColaborador inherits Nota {
-	var nombreColaborador
-	
-	constructor(_cant, _nombre) = super(_cant) {
-		nombreColaborador = _nombre
-	}
+class NotaColaborador inherits Nota {	
+	constructor(_cantCaracteres, _nombreColaborador) = super(_nombreColaborador, _cantCaracteres)
 	
 	method costo() {
-		return (cantCaracteres * 25) / 1000
+		return (tamanio * 25) / 1000
 	}
-	
-	method nombre() { 
-		return nombreColaborador
-	}	
 }
 
 class NotaLocal inherits Nota {
-	var nombreMedio
 	var precio
 	
-	constructor(_cant, _nombre, _precio) = super(_cant) {
-		nombreMedio = _nombre
+	constructor(_cantCaracteres, _nombreMedio, _precio) = super(_nombreMedio, _cantCaracteres) {
 		precio = _precio
 	}
 	
 	method costo() {
 		return precio
 	}
-	
-	method nombre() { 
-		return nombreMedio
-	}	
 }
 
 class NotaExtranjera inherits NotaLocal {
 	var importeFijo
 	
-	constructor(_cant, _nombre, _precio, _importe) = super(_cant, _nombre, _precio) {
+	constructor(_cantCaracteres, _nombreMedio, _precio, _importe) = super( _cantCaracteres, _nombreMedio, _precio) {
 		importeFijo = _importe
 	}
 	
@@ -227,59 +218,34 @@ class NotaExtranjera inherits NotaLocal {
 	}
 }
 
-class Publicidad {
-	var nombreCreativo
-	var nombrePublicidad
+class Publicidad inherits ElementosDiario {
 	var cliente
 	var valorXCm
-	var largo
 	
-	constructor(_nombreCreativo, _nombrePublicidad, _cliente, _valor, _largo) {
-		nombreCreativo = _nombreCreativo
-		nombrePublicidad = _nombrePublicidad
+	constructor(_nombreCreativo, _cliente, _valor, _largo) = super(_nombreCreativo, _largo) {
 		cliente = _cliente
 		valorXCm = _valor
-		largo = _largo
 	}
 	
 	method costo() {
-		return valorXCm * largo
-	}
-	
-	method ocupa() {
-		return largo
-	}
-	
-	method nombre() {
-		return nombreCreativo
-	}
-	
-	method nombrePubic() {
-		return nombrePublicidad
+		return valorXCm * tamanio
 	}
 }
 
-class Foto {
-	var fotografo
-	var tamanio
-	
-	constructor(_fotografo, _tamanio) {
-		fotografo = _fotografo
-		tamanio = _tamanio
-	}
+class Foto inherits ElementosDiario {	
+	constructor(_fotografo, _tamanio) = super(_fotografo, _tamanio)
 	
 	method costo() {
 		if (tamanio > 75)
 			return 200
 		return 50
-	}
-	
-	method ocupa() {
-		return tamanio
-	}
-	
-	method nombre() {
-		return fotografo
-	}
-	
+	}	
 }
+
+/* 
+El motivo de uso de herencia y super es la posibilidad de simplificar y evitar repeticiones en código.
+Para este caso todos los elementos que conforman un ejemplar de un diario (Notas, Publicidades y fotografías) comparten la varible nombre de autor y tamaño (esta variable con la respectiva unidad ya sean caracteres o cm).
+
+Los conceptos que se utlizan son principalmente polimorfismo y herencia.  
+
+ */

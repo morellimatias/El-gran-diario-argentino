@@ -1,12 +1,12 @@
 import El_gran_diario_argentino.*
 program abc {
 	
-	var rutaDelDineroK = new NotaPeriodista(1000, "Lanata") // Instancio una nota de periodista
+	var rutasDelPais = new NotaPeriodista(1000, "Arriaga") // Instancio una nota de periodista
 	var elAleph = new NotaEscritor(3000, "Borges") // Instancio una nota de escritor
 	var atentado11S = new NotaExtranjera(500, "NY Times", 2000, 1000) // Instancio una nota extranjera
 	
-	var nestle1 = new Publicidad("Matias","nestle1", "Nestle", 5000, 5 ) // Instancio una publicidad
-	var matarazzo1 = new Publicidad("Leandro", "matarazzo1", "Matarazzo", 1000, 20) // Instancio una publicidad
+	var nestle1 = new Publicidad("Matias", "Nestle", 5000, 5 ) // Instancio una publicidad
+	var matarazzo1 = new Publicidad("Leandro", "Matarazzo", 1000, 20) // Instancio una publicidad
 	
 	var febrero_1 = new Diario("Domingo", 48, 100000, 3) // Instancio el 1er diario de un mes
 	var febrero_2 = new Diario("Lunes", 20, 50000, 1) //Instancio el 2do diario de un mes
@@ -22,7 +22,7 @@ program abc {
 	febrero_1.agregarPublicidad(matarazzo1, 3)
 	
 	febrero_2.noSeVendieron(5000)
-	febrero_2.agregarNota(rutaDelDineroK)
+	febrero_2.agregarNota(rutasDelPais)
 	febrero_2.agregarNota(elAleph)
 	
 	febrero_2.agregarPublicidad(matarazzo1, 5)
@@ -31,10 +31,13 @@ program abc {
 	febrero.agregarDiario(febrero_1)
 	febrero.agregarDiario(febrero_2)
 	
-	console.println(febrero_1.cantidadVecesPublicada("matarazzo1"))
+	console.println(febrero.saldoFinal())
+	console.println(febrero_1.saldoDiario())
+	console.println(febrero_2.saldoDiario())
+	console.println(febrero_2.cantidadVecesPublicada(matarazzo1))
 	console.println(febrero.mejorDia())
 	console.println(febrero.buscarProduccion("NY Times"))
-	//console.println(febrero.cantVecesPublicada(matarazzo1))
+	console.println(febrero.cantVecesPublicada(nestle1))
 	
 	
 	
@@ -55,8 +58,8 @@ program abc {
 	
 	
 
-	console.println(rutaDelDineroK.nombre())
-	console.println(rutaDelDineroK.costo())
+	console.println(rutasDelPais.nombre())
+	console.println(rutasDelPais.costo())
 	
 	console.println(elAleph.nombre())
 	console.println(elAleph.costo())
