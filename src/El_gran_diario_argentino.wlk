@@ -171,7 +171,6 @@ class NotaEscritor inherits Nota {
 	constructor(_cantCaracteres, _nombreEscritor) = super(_nombreEscritor, _cantCaracteres)
 	
 	method costo() {
-		//return (cantCaracteres * 100) / 1000
 		return (tamanio * 100) / 1000
 	}
 }
